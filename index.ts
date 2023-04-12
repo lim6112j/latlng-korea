@@ -1,18 +1,40 @@
 import _ from 'lodash';
 import csvtojson from 'csvtojson';
+import fs from 'fs';
 // load csv file
-const csvfilepath = 'latlng_korea.csv';
-const jsonWithCsv = async (filepath: string) => {
-  const json = await csvtojson().fromFile(filepath);
+const csvfilename = 'latlng-all';
+const fileExists = (fileName : string) => {
+  let result = false;
+  fs.stat(`./data/${fileName}.json`, function(err, stat) {
+  if (err == null) {
+    console.log('File exists');
+    result = true;
+  } else if (err.code === 'ENOENT') {
+    // file does not exist
+    console.log('file not exists: ', err.code);
+  } else {
+    console.log('Some other error: ', err.code);
+  }
+});
+  return result;
+}
+const jsonWithCsv = async (fileName: string) => {
+  if (!fileExists(fileName)) {
+    const json = await csvtojson().fromFile(`./data/${fileName}.csv`);
+    fs.writeFileSync(`./data/${fileName}.json`, JSON.stringify(json) )
   return json;
+  } else {
+   const json = fs.readFileSync('./data/${fileName}.json')
+   return json;
+  }
 }
 // find string in a row
-jsonWithCsv(csvfilepath).then((res) => {
-  const query1 = `시도`;
-  const query2 = `시군구`;
+jsonWithCsv(csvfilename).then((res) => {
+  const query1 = `리`;
+  const query2 = `읍/면/리/동`;
   const query3 = `읍면동/구`;
-  const query4 = `읍/면/리/동`;
-  const query5 = `리`;
+  const query4 = `시군구`;
+  const query5 = `시도`;
   const val = process.argv[2]
   console.log(val);
   const found = _.find(res, function(o) { 
