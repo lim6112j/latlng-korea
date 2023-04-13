@@ -1,4 +1,5 @@
 # how to run
+csv file을 ./data 폴더에 복사
 
 ```
 // 시 도 구 군 동 명을 열거해서 출력
