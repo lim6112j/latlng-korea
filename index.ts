@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import csvtojson from 'csvtojson';
 import fs from 'fs';
+import { Md5 } from "ts-md5";
 // load csv file
 const csvfilename = 'latlng-all';
 const fileExists = (fileName: string) => {
