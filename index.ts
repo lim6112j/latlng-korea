@@ -78,5 +78,59 @@ if (process.argv[2] == "arg") {
     })
 
   });
+} else if (process.argv[2] == "stcis") {
+  const result: string[] = [];
+  const failed: string[] = [];
+  jsonWithCsv(csvfilename).then(async (res) => {
+    const query1 = `리`;
+    const query2 = `읍/면/리/동`;
+    const query3 = `읍면동/구`;
+    const query4 = `시군구`;
+    const query5 = `시도`;
+    jsonWithCsv(process.argv[3]).then(async (val) => {
+      const subStartQ1 = `읍면동(출발)`;
+      const subStartQ2 = `시군구(출발)`;
+      const subStartQ3 = `시도(출발)`;
+      const subEndQ1 = `읍면동(도착)`;
+      const subEndQ2 = `시군구(도착)`;
+      const subEndQ3 = `시도(도착)`;
+      _.map(val, function(v: any) {
+        const startStr = v[subStartQ1] != "-" ? v[subStartQ1]
+          : v[subStartQ2] != "-" ? v[subStartQ2]
+            : v[subStartQ3] != "-" ? v[subStartQ3]
+              : ""
+        const endStr = v[subEndQ1] != "-" ? v[subEndQ1]
+          : v[subEndQ2] != "-" ? v[subEndQ2]
+            : v[subEndQ3] != "-" ? v[subEndQ3]
+              : "";
+        let foundStart = _.find(res, function(o) {
+          return o[query1] == startStr || o[query2] == startStr || o[query3] == startStr || o[query4] == startStr || o[query5] == startStr
+        });
+
+        const foundEnd = _.find(res, function(o) {
+          return o[query1] == endStr || o[query2] == endStr || o[query3] == endStr || o[query4] == endStr || o[query5] == endStr
+        });
+        if (foundStart && foundEnd) {
+          v['위도(출발)'] = foundStart['위도'];
+          v['경도(출발)'] = foundStart['경도'];
+          v['위도(도착)'] = foundEnd['위도'];
+          v['경도(도착)'] = foundEnd['경도'];
+          result.push(v);
+          //console.log(v, found['위도'], found['경도'])
+        } else {
+          failed.push(`${JSON.stringify(v)}: not found`);
+          console.log("not found for ", v);
+        }
+
+      });
+
+      console.log(result)
+      fs.writeFileSync(`./data/${process.argv[3]}_result.json`, JSON.stringify(result))
+      fs.writeFileSync(`./data/${process.argv[3]}_failed.json`, JSON.stringify(failed))
+    })
+
+  });
 }
+
+
 
