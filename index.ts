@@ -29,17 +29,53 @@ const jsonWithCsv = async (fileName: string) => {
   }
 }
 // find string in a row
-jsonWithCsv(csvfilename).then((res) => {
-  const query1 = `리`;
-  const query2 = `읍/면/리/동`;
-  const query3 = `읍면동/구`;
-  const query4 = `시군구`;
-  const query5 = `시도`;
-  const val = process.argv.slice(2);
-  _.map(val, function(v) {
-    const found = _.find(res, function(o) {
-      return o[query1] == v || o[query2] == v || o[query3] == v || o[query4] == v || o[query5] == v
+if (process.argv[2] == "arg") {
+  jsonWithCsv(csvfilename).then((res) => {
+    const query1 = `리`;
+    const query2 = `읍/면/리/동`;
+    const query3 = `읍면동/구`;
+    const query4 = `시군구`;
+    const query5 = `시도`;
+    const val = process.argv.slice(3);
+    _.map(val, function(v) {
+      const found = _.find(res, function(o) {
+        return o[query1] == v || o[query2] == v || o[query3] == v || o[query4] == v || o[query5] == v
+      });
+      console.log(v, found['위도'], found['경도']);
     });
-    console.log(v, found['위도'], found['경도']);
   });
-});
+} else if (process.argv[2] == "file") {
+  const result: string[] = [];
+  const failed: string[] = [];
+  jsonWithCsv(csvfilename).then(async (res) => {
+    const query1 = `리`;
+    const query2 = `읍/면/리/동`;
+    const query3 = `읍면동/구`;
+    const query4 = `시군구`;
+    const query5 = `시도`;
+    jsonWithCsv(process.argv[3]).then(async (val) => {
+      _.map(val, function(v: any) {
+        const vm = v["위치명"].split(" ").pop();
+        const found = _.find(res, function(o) {
+          return o[query1] == vm || o[query2] == vm || o[query3] == vm || o[query4] == vm || o[query5] == vm
+        });
+        if (found) {
+          v['위도'] = found['위도'];
+          v['경도'] = found['경도'];
+          result.push(v);
+          //console.log(v, found['위도'], found['경도'])
+        } else {
+          failed.push(`${v['위치명']}: not found`);
+          console.log("not found for ", vm);
+        }
+
+      });
+
+      console.log(result)
+      fs.writeFileSync(`./data/${process.argv[3]}_result.json`, JSON.stringify(result))
+      fs.writeFileSync(`./data/${process.argv[3]}_failed.json`, JSON.stringify(failed))
+    })
+
+  });
+}
+
