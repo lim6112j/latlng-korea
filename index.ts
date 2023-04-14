@@ -103,7 +103,7 @@ if (process.argv[2] == "arg") {
           : v[subEndQ2] != "-" ? v[subEndQ2]
             : v[subEndQ3] != "-" ? v[subEndQ3]
               : "";
-        let foundStart = _.find(res, function(o) {
+        const foundStart = _.find(res, function(o) {
           return o[query1] == startStr || o[query2] == startStr || o[query3] == startStr || o[query4] == startStr || o[query5] == startStr
         });
 
@@ -131,6 +131,5 @@ if (process.argv[2] == "arg") {
 
   });
 }
-
 
 
